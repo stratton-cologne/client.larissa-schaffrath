@@ -5,30 +5,37 @@
             <ul class="flex w-full items-center" :style="trackStyle" @transitionend="handleTransitionEnd">
                 <li v-for="(cat, i) in loopedItems" :key="`${cat}-${i}`"
                     class="shrink-0 basis-1/3 text-center flex items-center justify-center h-full transition-all duration-300">
-                    <h2 class="relative block mx-auto pb-[50px] bg-no-repeat bg-[length:6px] bg-position-[50%_40px] hover:bg-position-[50%_50px] transition-[background-position] duration-300 ease font-[Poppins] text-[26px] leading-[26px] font-semibold text-center tracking-[3px] lowercase cursor-pointer"
-                        :style="{ backgroundImage: `url(${arrowDown})` }" @click="onItemClick(i)"
+                    <h2 class="relative block mx-auto pb-[50px] duration-300 ease font-[Poppins] text-[26px] leading-[26px] font-semibold text-center tracking-[3px] lowercase cursor-pointer"
+                        @click="onItemClick(i)"
                         :class="{ 'opacity-40 scale-[0.6] text-white': i !== current, 'opacity-100 scale-100 text-primary': i === current }">
                         {{ t(`categories.${cat}`) }}
+                        <UiIcon name="arrow-down"
+                            class="absolute left-1/2 -translate-x-1/2 bottom-0 inline-block transition-transform duration-300 ease-in-out hover:translate-y-2" />
                     </h2>
                 </li>
             </ul>
         </div>
         <!-- Arrows -->
-        <div class="absolute block inset-0 m-auto cursor-pointer text-white text-[40px] select-none
-            z-3 right-auto w-[50px] bg-no-repeat bg-size-[40px] bg-position-[100%_50%] hover:bg-position-[0%_50%] transition-[background-position] duration-300 ease-in-out"
-            aria-label="Previous" @click="prev" :style="{ backgroundImage: `url(${arrowLeft})` }">
+        <div class="absolute inset-y-0 left-4 my-auto block cursor-pointer select-none text-white text-[40px] z-4
+         duration-300 ease-in-out group" aria-label="Previous" @click="prev">
+            <UiIcon name="arrow-left"
+                class="inline-block transition-transform duration-300 ease-in-out group-hover:-translate-x-2" />
         </div>
-        <div class="absolute block inset-0 m-auto cursor-pointer text-white text-[40px] select-none
-            z-4 left-auto w-[50px] bg-no-repeat bg-size-[40px] bg-position-[0px_50%] hover:bg-position-[10px_50%]
-            transition-[background-position] duration-300 ease-in-out" @click="next" aria-label="Next"
-            :style="{ backgroundImage: `url(${arrowRight})` }">
+        <div class="absolute inset-0 m-auto block cursor-pointer text-white text-[40px] select-none
+         z-4 left-auto w-[50px] duration-300 ease-in-out group" @click="next" aria-label="Next">
+            <UiIcon name="arrow-right"
+                class="transition-transform duration-300 ease-in-out group-hover:translate-x-2" />
         </div>
+
     </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue'
 import { useI18n } from 'vue-i18n'
+
+import { Icon as UiIcon } from '@stratton-cologne/ui'
+
 import arrowLeft from '@/assets/image/arrow-left.png'
 import arrowRight from '@/assets/image/arrow-right.png'
 import arrowDown from '@/assets/image/arrow-down.png'

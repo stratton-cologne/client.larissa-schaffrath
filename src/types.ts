@@ -23,4 +23,6 @@ export type ClientSettingsDto = {
         position?: string;
         overlay?: string;
     } | null;
+    brand_name?: string | null;
+    brand_subtitle?: string | null;
 };
