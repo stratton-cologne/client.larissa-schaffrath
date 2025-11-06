@@ -1,0 +1,2 @@
+Platzhalter für Binärdatei. Originalinhalt war im Export nicht enthalten.
+Pfad: resources/client/src/assets/fonts/Poppins-Black.ttf

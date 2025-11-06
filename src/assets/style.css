@@ -1,0 +1,165 @@
+@import "./fonts.css";
+@import "tailwindcss";
+@layer theme, base, components, utilities;
+
+/* 1) Standard-Breakpoints komplett zurücksetzen */
+@theme {
+  /* --breakpoint-*: initial; */
+}
+
+@theme {
+  --font-indie: "Indie Flower", Arial;
+  --font-poppins: "Poppins", sans-serif;
+}
+
+@theme {
+  --color-dark-bg: #171717;
+  --color-light-text: #ffffff;
+  --color-secondary-text: #bab8ab;
+  --color-accent: #f0a500;
+  --color-primary: #ff9900;
+
+  --spacing-30: 7.5rem;
+}
+
+@variant dark (&:where(.dark, .dark *));
+
+/* Custom styles for Schulz Hygiene website */
+@layer base {
+  * {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100%;
+    background-color: #fff;
+    font-family: Arial, sans-serif;
+    font-size: 14px;
+    line-height: 20px;
+    color: #333;
+  }
+
+  h1 {
+    font-size: 2em;
+    margin: 0.67em 0;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
+
+  h1 {
+    font-size: 38px;
+    line-height: 44px;
+    margin-top: 20px;
+  }
+}
+
+@layer components {
+  body {
+    @apply bg-gray-50 text-gray-800;
+  }
+
+  .text-sm {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+  }
+
+  .input {
+    @apply mb-2 w-full rounded border px-3 py-2;
+  }
+  .btn {
+    @apply rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600;
+  }
+
+  .login {
+    .input {
+      @apply mb-2 rounded border px-3 py-2;
+    }
+
+    .btn {
+      @apply rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600;
+    }
+  }
+}
+
+@theme {
+  --animate-fadeInUp: fadeInUp 0.8s ease-out;
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* body {
+  min-height: 1080px;
+  height: 100%;
+  width: 1920px;
+} */
+
+/* * {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+} */
+
+/* body {
+  font-family: "Lato", sans-serif;
+  background-color: var(--dark-bg);
+  color: var(--light-text);
+  overflow-x: hidden;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+  transition: opacity 0.3s;
+}
+
+a:hover {
+  opacity: 0.7;
+}
+
+input,
+textarea {
+  font-family: "Lato", sans-serif;
+}
+
+.indie-flower {
+  font-family: "Indie Flower", cursive;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--dark-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #444;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+} */
+
+

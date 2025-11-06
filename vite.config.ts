@@ -20,7 +20,7 @@ export default defineConfig(({ mode }) => {
         plugins,
         define: {
             "import.meta.env.VITE_BUILD_TIME": JSON.stringify(
-                new Date().toISOString()
+                new Date().toISOString(),
             ),
         },
         resolve: {
@@ -33,6 +33,17 @@ export default defineConfig(({ mode }) => {
         server: {
             host: true,
             port: 5174,
+            proxy: {
+                // alles unter /api an Laravel/Backend
+                "/api": {
+                    target: "http://localhost:8000",
+                    changeOrigin: true,
+                    // optional: wenn Backend kein /api-Prefix hat, hier umschreiben
+                    // rewrite: (p) => p.replace(/^\/api/, ""),
+                },
+                // Medien-Download falls nicht unter /api liegt, ggf. ergänzen:
+                // "/storage": { target: "http://localhost:8000", changeOrigin: true },
+            },
         },
     };
 });
