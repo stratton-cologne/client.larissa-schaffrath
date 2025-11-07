@@ -1,10 +1,10 @@
 <!-- components/ui/OverlayShell.vue -->
 <template>
     <Transition name="fade">
-        <div v-if="open" class="fixed inset-0 z-[100] flex items-center justify-center"
-            :class="[blur ? 'backdrop-blur-[2px]' : '', backdropClass]" role="dialog" aria-modal="true"
-            @click="$emit('close')">
-            <div class="relative" @click.stop>
+        <div v-if="open" class="fixed inset-0 z-100 flex items-center justify-center overflow-hidden
+             bg-[#1a1a1af2] backdrop-blur-[2px]" role="dialog" aria-modal="true" @click="$emit('close')">
+            <!-- Außenabstand 40px -->
+            <div class="relative w-full h-full p-10 flex items-center justify-center" @click.stop>
                 <slot />
             </div>
         </div>
@@ -17,6 +17,7 @@ const props = withDefaults(defineProps<{
     backdrop?: 'dark' | 'none'
     blur?: boolean
 }>(), { backdrop: 'dark', blur: true })
+
 const backdropClass = props.backdrop === 'dark' ? 'bg-[#1a1a1af2]' : ''
 </script>
 
@@ -31,5 +32,3 @@ const backdropClass = props.backdrop === 'dark' ? 'bg-[#1a1a1af2]' : ''
     opacity: 0
 }
 </style>
-
-

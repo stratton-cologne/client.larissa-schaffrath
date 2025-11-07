@@ -26,6 +26,17 @@
             role="dialog" aria-modal="true">
             <GalleryView v-if="activeGallery" :gallery="activeGallery" @close="closeGallery" />
         </div>
+
+        <!-- ✨ HIER: Router-Inhalt (Impressum/Datenschutz) rendern -->
+        <RouterView />
+
+        <!-- ... in App.vue, direkt innerhalb der <div class="app-root ...">, NACH den Sheets -->
+        <footer class="pointer-events-auto fixed bottom-4 left-4 z-60 flex gap-4 text-sm text-white/70"
+            aria-label="Rechtliches">
+            <RouterLink to="/impressum" class="underline hover:text-white transition-colors">Impressum</RouterLink>
+            <span aria-hidden="true">·</span>
+            <RouterLink to="/datenschutz" class="underline hover:text-white transition-colors">Datenschutz</RouterLink>
+        </footer>
     </div>
 </template>
 

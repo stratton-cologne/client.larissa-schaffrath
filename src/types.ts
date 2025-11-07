@@ -66,6 +66,14 @@ export type ContactDto = {
     is_published?: boolean;
 };
 
+export type LegalPageDto = {
+    id: number;
+    slug: "impressum" | "datenschutz";
+    title: string;
+    content: string; // Plain/Markdown/HTML
+    is_published: boolean;
+};
+
 export type GalleryItem = {
     id: number;
     title: string;

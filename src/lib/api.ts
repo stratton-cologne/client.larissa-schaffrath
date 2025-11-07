@@ -7,6 +7,7 @@ import type {
     ContactDto,
     GalleryItem,
     GalleryShowResponse,
+    LegalPageDto,
 } from "@/types";
 
 const RAW_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? "";
@@ -180,4 +181,8 @@ export const api = {
         if (!res.ok) throw new Error("Failed to load gallery");
         return (await res.json()) as GalleryShowResponse;
     },
+
+    // Legal Pages: GET /api/legal/:slug  (slug: "impressum" | "datenschutz")
+    getLegal: (slug: "impressum" | "datenschutz") =>
+        get<LegalPageDto>(`/api/legal/${slug}`),
 };
