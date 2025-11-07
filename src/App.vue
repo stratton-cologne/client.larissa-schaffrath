@@ -8,74 +8,72 @@
             <HomeView :tilted="tilted" :scaled="scaled" @tilt-end="onHomeTransformEnd" @aboutClick="openAbout"
                 @contactClick="openContact" @categoryClick="handleCategoryClick" />
         </div>
+
+        <!-- GALLERY: von UNTEN rein/raus -->
+        <div class="gallery-sheet" :class="{ 'is-open': isGalleryOpen }" @transitionend="onGalleryTransitionEnd"
+            role="dialog" aria-modal="true">
+            <GalleryView v-if="activeGallery" :gallery="activeGallery" @close="closeGallery" />
+        </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref } from 'vue'
+
+import { api } from '@/lib/api'
+import type { GalleryShowResponse } from '@/types'   // ⬅️ richtiger Pfad
 
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher.vue'
-
 import HomeView from '@/views/Home.vue'
+import GalleryView from '@/views/Gallery.vue'
 
-// API
+const tilted = ref(false)
+const scaled = ref(false)
 
-// Passe den Typ an deine Kategorien an:
-type GalleryCategory = 'portraits' | 'landscape' | 'wildlife'
-type Category = GalleryCategory | 'dummy1' | 'dummy2'
-
-/** Zustände **/
-const tilted = ref(false)               // Home kippt (für Gallery)
-const scaled = ref(false)               // Home skaliert (für About/Contact)
-
-const pendingCategory = ref<GalleryCategory | null>(null)
-const activeCategory = ref<GalleryCategory | null>(null)
-/** Welche Aktion wartet auf Home-Transition? */
+const isGalleryOpen = ref(false)
 const pendingAction = ref<null | 'gallery' | 'about' | 'contact'>(null)
 
-onMounted(async () => {
-    console.log('App mounted');
-})
+const pendingGalleryId = ref<number | null>(null)
+const activeGallery = ref<GalleryShowResponse | null>(null)
 
-/** Kategorie aus dem Slider */
-function handleCategoryClick(c: string) {
-    // auf unsere bekannte Union eingrenzen
-    type GalleryCategory = 'portraits' | 'landscape' | 'wildlife'
-    type Category = GalleryCategory | 'dummy1' | 'dummy2'
-
-    if (c === 'dummy1' || c === 'dummy2') return
-    // hier ist c sicher eine GalleryCategory
-    pendingCategory.value = c as GalleryCategory
+async function handleCategoryClick(id: number | string) { // ⬅️ robust gegen union
+    pendingGalleryId.value = Number(id)
     pendingAction.value = 'gallery'
-    tilted.value = true// Phase A (Gallery): Home kippen
+    tilted.value = true
 }
 
-/** About/Contact aus HomeView */
-function openAbout() {
-    pendingAction.value = 'about'
-    scaled.value = true               // Phase A (About): Home skalieren
-}
+function openAbout() { pendingAction.value = 'about'; scaled.value = true }
+function openContact() { pendingAction.value = 'contact'; scaled.value = true }
 
-function openContact() {
-    pendingAction.value = 'contact'
-    scaled.value = true               // Phase A (Contact): Home skalieren
-}
-
-/** Home-Transform fertig → passende Overlay-Phase B starten */
-function onHomeTransformEnd() {
-    if (pendingAction.value === 'gallery' && pendingCategory.value) {
-        activeCategory.value = pendingCategory.value
+async function onHomeTransformEnd() {
+    if (pendingAction.value === 'gallery' && pendingGalleryId.value != null) {
+        try {
+            activeGallery.value = await api.fetchGalleryById(pendingGalleryId.value)
+            isGalleryOpen.value = true
+        } catch (e) {
+            console.warn('Failed to fetch gallery', e)
+            tilted.value = false
+        } finally {
+            pendingAction.value = null
+        }
         return
     }
-    if (pendingAction.value === 'about') {
-        return
-    }
-    if (pendingAction.value === 'contact') {
-        return
+    if (pendingAction.value === 'about' || pendingAction.value === 'contact') {
+        pendingAction.value = null
     }
 }
 
+function closeGallery() { isGalleryOpen.value = false }
+function onGalleryTransitionEnd(e: TransitionEvent) {
+    if (e.propertyName !== 'transform') return
+    if (!isGalleryOpen.value) {
+        tilted.value = false
+        activeGallery.value = null
+        pendingGalleryId.value = null
+    }
+}
 </script>
+
 
 <style scoped>
 .app-root {
@@ -95,4 +93,21 @@ function onHomeTransformEnd() {
 /* ============ CONTACT (von rechts) ============ */
 
 /* ============ GALLERY (von unten) ============ */
+
+.gallery-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 50;
+    display: flex;
+    align-items: flex-end;
+    pointer-events: none;
+    /* deaktiviert, solange offscreen */
+    transform: translate(0px, 100%);
+    transition: transform 300ms linear;
+}
+
+.gallery-sheet.is-open {
+    transform: translateX(0px) translateY(0px) translateZ(0px);
+    pointer-events: auto;
+}
 </style>

@@ -1,7 +1,11 @@
 // src/lib/api.ts
 // Minimaler API-Client für öffentliche Endpunkte (Proxy-freundlich)
 
-import type { ClientSettingsDto } from "@/types";
+import type {
+    ClientSettingsDto,
+    GalleryItem,
+    GalleryShowResponse,
+} from "@/types";
 
 const RAW_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? "";
 
@@ -108,4 +112,38 @@ export function videoFromClientSettings(
  * ------------------------------------------*/
 export const api = {
     getClientSettings: () => get<ClientSettingsDto>("/api/client-settings"),
+
+    // alle (Option B vom Controller wäre z.B. ?perPage=all)
+    getGalleries: async (params?: { published?: 0 | 1 }) => {
+        const url = new URL("/api/galleries", window.location.origin);
+        if (params?.published !== undefined)
+            url.searchParams.set("published", String(params.published));
+        const res = await fetch(url.toString(), {
+            headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error("Failed to load galleries");
+        return (await res.json()) as GalleryItem[]; // bei Paginator ggf. .data nehmen
+    },
+
+    fetchGalleries: async (params?: { published?: 0 | 1 }) => {
+        const url = new URL("/api/galleries", window.location.origin);
+        if (params?.published !== undefined)
+            url.searchParams.set("published", String(params.published));
+        const res = await fetch(url, {
+            headers: { Accept: "application/json" },
+        });
+        if (!res.ok) throw new Error("Failed to load galleries");
+        return (await res.json()) as GalleryItem[];
+    },
+
+    fetchGalleryById: async (id: number) => {
+        const res = await fetch(
+            new URL(`/api/galleries/${id}`, window.location.origin),
+            {
+                headers: { Accept: "application/json" },
+            },
+        );
+        if (!res.ok) throw new Error("Failed to load gallery");
+        return (await res.json()) as GalleryShowResponse;
+    },
 };
