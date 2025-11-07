@@ -1,15 +1,27 @@
 <template>
-    <!-- Language Switcher -->
+    <!-- Language Switcher bleibt global sichtbar -->
     <LanguageSwitcher />
 
     <div class="app-root bg-[#1a1a1a]">
-        <!-- Perspektive MUSS auf dem Parent liegen -->
+        <!-- Perspektive MUSS auf dem Parent liegen (3D-Effekt für Home-Tilt) -->
         <div class="stage">
             <HomeView :tilted="tilted" :scaled="scaled" @tilt-end="onHomeTransformEnd" @aboutClick="openAbout"
                 @contactClick="openContact" @categoryClick="handleCategoryClick" />
         </div>
 
-        <!-- GALLERY: von UNTEN rein/raus -->
+        <!-- ================= ABOUT: von LINKS rein/raus ================= -->
+        <div class="about-sheet" :class="{ 'is-open': isAboutOpen }" @transitionend="onAboutTransitionEnd" role="dialog"
+            aria-modal="true">
+            <AboutOverlay v-if="portfolio" :portfolio="portfolio" :is-visible="isAboutOpen" @close="closeAbout" />
+        </div>
+
+        <!-- ================= CONTACT: von RECHTS rein/raus ================= -->
+        <div class="contact-sheet" :class="{ 'is-open': isContactOpen }" @transitionend="onContactTransitionEnd"
+            role="dialog" aria-modal="true">
+            <ContactOverlay v-if="contact" :contact="contact" :is-visible="isContactOpen" @close="closeContact" />
+        </div>
+
+        <!-- ================= GALLERY: von UNTEN rein/raus ================= -->
         <div class="gallery-sheet" :class="{ 'is-open': isGalleryOpen }" @transitionend="onGalleryTransitionEnd"
             role="dialog" aria-modal="true">
             <GalleryView v-if="activeGallery" :gallery="activeGallery" @close="closeGallery" />
@@ -20,32 +32,77 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-import { api } from '@/lib/api'
-import type { GalleryShowResponse } from '@/types'   // ⬅️ richtiger Pfad
-
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher.vue'
 import HomeView from '@/views/Home.vue'
 import GalleryView from '@/views/Gallery.vue'
+import AboutOverlay from '@/views/About.vue'
+import ContactOverlay from '@/views/Contact.vue'
 
-const tilted = ref(false)
-const scaled = ref(false)
+import { api } from '@/lib/api'
+import type { PortfolioDto, ContactDto, GalleryShowResponse } from '@/types'
 
+/** =================== Phase A – Home-States =================== */
+const tilted = ref(false)  // Home kippt (für Gallery)
+const scaled = ref(false)  // Home skaliert (für About/Contact)
+
+/** =================== Phase B – Overlay Sichtbarkeit =================== */
 const isGalleryOpen = ref(false)
-const pendingAction = ref<null | 'gallery' | 'about' | 'contact'>(null)
+const isAboutOpen = ref(false)
+const isContactOpen = ref(false)
 
+/** =================== Gallery-States =================== */
 const pendingGalleryId = ref<number | null>(null)
 const activeGallery = ref<GalleryShowResponse | null>(null)
 
-async function handleCategoryClick(id: number | string) { // ⬅️ robust gegen union
+/** =================== About-/Contact-Daten =================== */
+const portfolio = ref<PortfolioDto | null>(null)
+const contact = ref<ContactDto | null>(null)
+
+/** =================== Pending-Aktion =================== */
+/**
+ * Merkt, welche Aktion nach Ende der Home-Transition ausgeführt wird:
+ *  - 'gallery' → Gallery-Sheet
+ *  - 'about'   → About-Sheet
+ *  - 'contact' → Contact-Sheet
+ */
+const pendingAction = ref<null | 'gallery' | 'about' | 'contact'>(null)
+
+/** =================== Events aus HomeView =================== */
+async function handleCategoryClick(id: number | string) {
     pendingGalleryId.value = Number(id)
     pendingAction.value = 'gallery'
-    tilted.value = true
+    tilted.value = true                 // Phase A: Home kippt
 }
 
-function openAbout() { pendingAction.value = 'about'; scaled.value = true }
-function openContact() { pendingAction.value = 'contact'; scaled.value = true }
+async function openAbout() {
+    pendingAction.value = 'about'
+    scaled.value = true                 // Phase A: Home skaliert
 
+    // Daten für About laden
+    try {
+        portfolio.value = await api.getPortfolio()
+    } catch (e) {
+        console.warn('Failed to fetch portfolio', e)
+        portfolio.value = null            // v-if verhindert leeres Overlay
+    }
+}
+
+async function openContact() {
+    pendingAction.value = 'contact'
+    scaled.value = true                 // Phase A: Home skaliert
+
+    // Daten für Contact laden
+    try {
+        contact.value = await api.getContact()
+    } catch (e) {
+        console.warn('Failed to fetch contact', e)
+        contact.value = null
+    }
+}
+
+/** =================== Phase A → B Umschalten =================== */
 async function onHomeTransformEnd() {
+    // Gallery nach Tilt öffnen
     if (pendingAction.value === 'gallery' && pendingGalleryId.value != null) {
         try {
             activeGallery.value = await api.fetchGalleryById(pendingGalleryId.value)
@@ -58,12 +115,26 @@ async function onHomeTransformEnd() {
         }
         return
     }
-    if (pendingAction.value === 'about' || pendingAction.value === 'contact') {
+
+    // About nach Scale öffnen
+    if (pendingAction.value === 'about') {
+        isAboutOpen.value = true
         pendingAction.value = null
+        return
+    }
+
+    // Contact nach Scale öffnen
+    if (pendingAction.value === 'contact') {
+        isContactOpen.value = true
+        pendingAction.value = null
+        return
     }
 }
 
-function closeGallery() { isGalleryOpen.value = false }
+/** =================== Gallery schließen =================== */
+function closeGallery() {
+    isGalleryOpen.value = false
+}
 function onGalleryTransitionEnd(e: TransitionEvent) {
     if (e.propertyName !== 'transform') return
     if (!isGalleryOpen.value) {
@@ -72,8 +143,29 @@ function onGalleryTransitionEnd(e: TransitionEvent) {
         pendingGalleryId.value = null
     }
 }
-</script>
 
+/** =================== About schließen =================== */
+function closeAbout() {
+    isAboutOpen.value = false
+}
+function onAboutTransitionEnd(e: TransitionEvent) {
+    if (e.propertyName !== 'transform') return
+    if (!isAboutOpen.value) {
+        scaled.value = false
+    }
+}
+
+/** =================== Contact schließen =================== */
+function closeContact() {
+    isContactOpen.value = false
+}
+function onContactTransitionEnd(e: TransitionEvent) {
+    if (e.propertyName !== 'transform') return
+    if (!isContactOpen.value) {
+        scaled.value = false
+    }
+}
+</script>
 
 <style scoped>
 .app-root {
@@ -89,11 +181,46 @@ function onGalleryTransitionEnd(e: TransitionEvent) {
 }
 
 /* ============ ABOUT (von links) ============ */
+.about-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: flex;
+    align-items: stretch;
+    pointer-events: none;
+    /* deaktiviert, solange offscreen */
+    transform: translateX(-100%);
+    /* offscreen links */
+    transition: transform 300ms ease;
+    /* rein/raus Dauer */
+}
+
+.about-sheet.is-open {
+    transform: translateX(0%);
+    pointer-events: auto;
+}
 
 /* ============ CONTACT (von rechts) ============ */
+.contact-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 45;
+    display: flex;
+    align-items: stretch;
+    pointer-events: none;
+    /* deaktiviert, solange offscreen */
+    transform: translateX(100%);
+    /* offscreen rechts */
+    transition: transform 300ms ease;
+    /* rein/raus Dauer */
+}
+
+.contact-sheet.is-open {
+    transform: translateX(0%);
+    pointer-events: auto;
+}
 
 /* ============ GALLERY (von unten) ============ */
-
 .gallery-sheet {
     position: fixed;
     inset: 0;
@@ -102,12 +229,14 @@ function onGalleryTransitionEnd(e: TransitionEvent) {
     align-items: flex-end;
     pointer-events: none;
     /* deaktiviert, solange offscreen */
-    transform: translate(0px, 100%);
+    transform: translateY(100%);
+    /* offscreen unten */
     transition: transform 300ms linear;
+    /* rein/raus Dauer */
 }
 
 .gallery-sheet.is-open {
-    transform: translateX(0px) translateY(0px) translateZ(0px);
+    transform: translateY(0%);
     pointer-events: auto;
 }
 </style>

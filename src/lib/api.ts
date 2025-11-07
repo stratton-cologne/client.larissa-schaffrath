@@ -3,6 +3,8 @@
 
 import type {
     ClientSettingsDto,
+    PortfolioDto,
+    ContactDto,
     GalleryItem,
     GalleryShowResponse,
 } from "@/types";
@@ -108,10 +110,42 @@ export function videoFromClientSettings(
 }
 
 /** -------------------------------------------
+ * Portfolio-Normalisierung (avatarUrl)
+ * ------------------------------------------*/
+export type PortfolioDtoNormalized = PortfolioDto & {
+    /** Direkt benutzbare URL für das Avatarbild */
+    avatarUrl: string | null;
+};
+
+export function normalizePortfolio(p: PortfolioDto): PortfolioDtoNormalized {
+    // Wenn ein Media-Eintrag vorhanden ist, nehmen wir die Download-Route
+    const mediaId = p?.avatar?.id ?? null;
+    const version = p?.avatar?.currentVersion?.version;
+    const avatarUrl =
+        typeof mediaId === "number"
+            ? mediaDownloadUrl(
+                  mediaId,
+                  typeof version === "number" ? version : undefined,
+              )
+            : null;
+
+    return { ...p, avatarUrl };
+}
+
+/** -------------------------------------------
  * Öffentliche API-Methoden
  * ------------------------------------------*/
 export const api = {
     getClientSettings: () => get<ClientSettingsDto>("/api/client-settings"),
+
+    // Portfolio: GET /api/portfolio -> normalisiert (avatarUrl befüllt)
+    getPortfolio: async () => {
+        const p = await get<PortfolioDto>("/api/portfolio");
+        return normalizePortfolio(p) as PortfolioDtoNormalized;
+    },
+
+    // Kontakt: GET /api/contact
+    getContact: () => get<ContactDto>("/api/contact"),
 
     // alle (Option B vom Controller wäre z.B. ?perPage=all)
     getGalleries: async (params?: { published?: 0 | 1 }) => {

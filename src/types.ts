@@ -27,6 +27,45 @@ export type ClientSettingsDto = {
     brand_subtitle?: string | null;
 };
 
+export type PortfolioDto = {
+    id?: number;
+    name?: string;
+    tagline?: string | null;
+    location?: string | null;
+    about?: string | null;
+    is_published?: boolean;
+    avatar_media_id?: number | null;
+    socials?: {
+        instagram?: string | null;
+        flickr?: string | null;
+        facebook?: string | null;
+        twitter?: string | null;
+    } | null;
+    avatar?: {
+        id: number;
+        currentVersion?: {
+            id: number;
+            version: number;
+            original_name: string;
+            path: string;
+            mime_type?: string | null;
+            width?: number | null;
+            height?: number | null;
+        } | null;
+    } | null;
+};
+
+export type ContactDto = {
+    id?: number;
+    email?: string | null;
+    phone?: string | null;
+    headline?: string | null;
+    subline?: string | null;
+    interest_label?: string | null;
+    interests?: string[] | null;
+    is_published?: boolean;
+};
+
 export type GalleryItem = {
     id: number;
     title: string;

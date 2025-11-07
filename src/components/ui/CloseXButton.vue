@@ -14,6 +14,5 @@
 <script setup lang="ts">
 defineProps<{ ariaLabel: string }>()
 
-import CrossImage from '@/assets/image/cross.png'
 import { Icon as UiIcon } from '@stratton-cologne/ui'
 </script>
