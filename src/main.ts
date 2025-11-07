@@ -1,5 +1,6 @@
 import { createApp } from "vue";
 import { setupAnalytics } from "./lib/analytics";
+import { createHead } from "@vueuse/head";
 
 import "@/assets/style.css";
 
@@ -11,6 +12,7 @@ const app = createApp(App);
 
 app.use(i18n);
 app.use(router);
+app.use(createHead());
 
 setupAnalytics();
 
