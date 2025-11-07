@@ -1,4 +1,5 @@
 import { createApp } from "vue";
+import { setupAnalytics } from "./lib/analytics";
 
 import "@/assets/style.css";
 
@@ -10,6 +11,8 @@ const app = createApp(App);
 
 app.use(i18n);
 app.use(router);
+
+setupAnalytics();
 
 app.mount("#app");
 
