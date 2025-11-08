@@ -1,6 +1,6 @@
 <template>
     <div
-        class="absolute top-1/2 z-6 flex flex-col justify-center items-center my-0 pb-[50px] font-poppins text-white text-[18px] leading-[18px] font-medium text-center tracking-[4px] cursor-pointer transition-all duration-300 ease-in-out opacity-100 bg-no-repeat bg-size-[5px]">
+        class="absolute top-1/2 z-6 flex flex-col justify-center items-center my-0 pb-[50px] font-secondary text-white text-[18px] leading-[18px] font-medium text-center tracking-[4px] cursor-pointer transition-all duration-300 ease-in-out opacity-100 bg-no-repeat bg-size-[5px]">
         <h4 @click="$emit('click')">
             {{ label }}
         </h4>

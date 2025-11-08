@@ -1,110 +1,110 @@
-@import "./fonts.css";
+/* @import "./fonts.css"; */
 @import "tailwindcss";
 @layer theme, base, components, utilities;
 
 /* 1) Standard-Breakpoints komplett zurücksetzen */
 @theme {
-  /* --breakpoint-*: initial; */
+    /* --breakpoint-*: initial; */
 }
 
 @theme {
-  --font-indie: "Indie Flower", Arial;
-  --font-poppins: "Poppins", sans-serif;
+    /* --font-indie: "Indie Flower", Arial; */
+    /* --font-poppins: "Poppins", sans-serif; */
 }
 
 @theme {
-  --color-dark-bg: #171717;
-  --color-light-text: #ffffff;
-  --color-secondary-text: #bab8ab;
-  --color-accent: #f0a500;
-  --color-primary: #ff9900;
+    --color-dark-bg: #171717;
+    --color-light-text: #ffffff;
+    --color-secondary-text: #bab8ab;
+    /* --color-accent: #f0a500; */
+    /* --color-primary: #ff9900; */
 
-  --spacing-30: 7.5rem;
+    --spacing-30: 7.5rem;
 }
 
 @variant dark (&:where(.dark, .dark *));
 
 /* Custom styles for Schulz Hygiene website */
 @layer base {
-  * {
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-  }
+    * {
+        -webkit-box-sizing: border-box;
+        -moz-box-sizing: border-box;
+        box-sizing: border-box;
+    }
 
-  body {
-    margin: 0;
-    min-height: 100%;
-    background-color: #fff;
-    font-family: Arial, sans-serif;
-    font-size: 14px;
-    line-height: 20px;
-    color: #333;
-  }
+    body {
+        margin: 0;
+        min-height: 100%;
+        background-color: #fff;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        line-height: 20px;
+        color: #333;
+    }
 
-  h1 {
-    font-size: 2em;
-    margin: 0.67em 0;
-  }
+    h1 {
+        font-size: 2em;
+        margin: 0.67em 0;
+    }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-weight: bold;
-    margin-bottom: 10px;
-  }
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
 
-  h1 {
-    font-size: 38px;
-    line-height: 44px;
-    margin-top: 20px;
-  }
+    h1 {
+        font-size: 38px;
+        line-height: 44px;
+        margin-top: 20px;
+    }
 }
 
 @layer components {
-  body {
-    @apply bg-gray-50 text-gray-800;
-  }
+    body {
+        @apply bg-gray-50 text-gray-800;
+    }
 
-  .text-sm {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-  }
+    .text-sm {
+        font-size: 0.875rem;
+        line-height: 1.25rem;
+    }
 
-  .input {
-    @apply mb-2 w-full rounded border px-3 py-2;
-  }
-  .btn {
-    @apply rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600;
-  }
-
-  .login {
     .input {
-      @apply mb-2 rounded border px-3 py-2;
+        @apply mb-2 w-full rounded border px-3 py-2;
+    }
+    .btn {
+        @apply rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600;
     }
 
-    .btn {
-      @apply rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600;
+    .login {
+        .input {
+            @apply mb-2 rounded border px-3 py-2;
+        }
+
+        .btn {
+            @apply rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-600;
+        }
     }
-  }
 }
 
 @theme {
-  --animate-fadeInUp: fadeInUp 0.8s ease-out;
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(30px);
-    }
+    --animate-fadeInUp: fadeInUp 0.8s ease-out;
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
 
-    to {
-      opacity: 1;
-      transform: translateY(0);
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
     }
-  }
 }
 
 /* body {
@@ -161,5 +161,3 @@ textarea {
 ::-webkit-scrollbar-thumb:hover {
   background: #555;
 } */
-
-

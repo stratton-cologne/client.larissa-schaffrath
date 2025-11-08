@@ -1,10 +1,10 @@
 <template>
     <div class="absolute inset-x-0 w-full -translate-y-1/2 text z-3" :class="positionClass">
-        <h1 class="font-poppins opacity-100 text-[#e0e0e0] text-[34px] leading-[40px] text-center tracking-[1px]transition-opacity transition-transform duration-[3000ms] ease-out transform-gpu"
+        <h1 class="font-secondary opacity-100 text-[#e0e0e0] text-[34px] leading-[40px] text-center tracking-[1px]transition-opacity transition-transform duration-[3000ms] ease-out transform-gpu"
             :class="entered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
             {{ name }}
         </h1>
-        <div class="font-indie text-primary text-lg leading-[1.5rem] tracking-[1px] text-center
+        <div class="font-primary text-primary text-lg leading-[1.5rem] tracking-[1px] text-center
         transition-opacity transition-transform duration-[3000ms] ease-out transform-gpu
            " :class="entered ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'">
             {{ subtitle }}

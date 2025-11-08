@@ -2,6 +2,11 @@
     <!-- Language Switcher bleibt global sichtbar -->
     <LanguageSwitcher />
 
+    <!-- Cookie Banner -->
+    <CookieConsent v-model="showBanner" :config="consentConfig" data-cc="banner" title="Cookies & Datenschutz"
+        description="Wir verwenden Cookies für Grundfunktionen und zur Verbesserung unseres Angebots."
+        policyHref="/datenschutz" @saved="onSaved" />
+
     <div class="app-root bg-[#1a1a1a]">
         <!-- Perspektive MUSS auf dem Parent liegen (3D-Effekt für Home-Tilt) -->
         <div class="stage">
@@ -36,6 +41,10 @@
             <RouterLink to="/impressum" class="underline hover:text-white transition-colors">Impressum</RouterLink>
             <span aria-hidden="true">·</span>
             <RouterLink to="/datenschutz" class="underline hover:text-white transition-colors">Datenschutz</RouterLink>
+            <span aria-hidden="true">·</span>
+            <button type="button" @click="openCookieEditor">
+                Cookie-Einstellungen
+            </button>
         </footer>
     </div>
 </template>
@@ -43,11 +52,25 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
+import { CookieConsent, useCookieConsent } from "@stratton-cologne/cookie-consent";
+import { openConsentEditor } from "@stratton-cologne/cookie-consent";
+import { consentConfig } from "@/consentConfig";
+
 import LanguageSwitcher from '@/components/ui/LanguageSwitcher.vue'
 import HomeView from '@/views/Home.vue'
 import GalleryView from '@/views/Gallery.vue'
 import AboutOverlay from '@/views/About.vue'
 import ContactOverlay from '@/views/Contact.vue'
+
+const showBanner = ref(true);
+
+function onSaved(map: Record<string, boolean>) {
+    console.log("Consent gespeichert:", map);
+}
+
+function openCookieEditor() {
+    openConsentEditor();
+}
 
 import { api } from '@/lib/api'
 import type { PortfolioDto, ContactDto, GalleryShowResponse } from '@/types'

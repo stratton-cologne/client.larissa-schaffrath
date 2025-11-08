@@ -52,7 +52,7 @@
                 </p>
 
                 <!-- Footer -->
-                <div class="mt-10 font-indie font-normal text-primary tracking-[0.05em]">
+                <div class="mt-10 font-primary font-normal text-primary tracking-[0.05em]">
                     <a v-if="contact?.email" class="text-primary hover:underline mr-6"
                         :href="`mailto:${contact.email}`">
                         {{ contact.email }}

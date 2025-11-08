@@ -1,0 +1,214 @@
+/* ==========================================================================
+   Cookie Consent – Consumer Styles (utility-friendly)
+   - Farben & Fonts: über deine Klassen (.bg-*, .text-*, .border-*, .font-*)
+   - Layout/Spacing/Shadow: hier definiert
+   ========================================================================== */
+
+/* Root: fix am unteren Rand, volle Breite */
+[data-cc="banner"] {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1000;
+
+    /* Farben/Familie von außen (Utilities) holen */
+    color: inherit;
+    background-color: var(--color-secondary);
+    border-top: 1px solid currentColor; /* wird gleich neutralisiert */
+    font-family: inherit;
+
+    /* Visuelle Basis */
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.08);
+}
+
+/* Wenn eine Border-Utility gesetzt ist, nimm deren Farbe statt currentColor */
+[data-cc="banner"].border-primary {
+    border-top-color: currentColor;
+}
+[data-cc="banner"].border-secondary {
+    border-top-color: currentColor;
+}
+
+/* Innenabstände + max Breite */
+[data-cc="banner"] .cc-inner {
+    max-width: 1280px; /* anpassbar */
+    margin-inline: auto;
+    padding: 1rem 1rem; /* 16px / 16px */
+}
+
+/* Fallback: Wenn du keine cc-inner-Wrapper nutzt, greife direkt */
+[data-cc="banner"]:not(:has(.cc-inner)) {
+    padding: 1rem 1rem;
+}
+
+/* Mobile-First: vertikales Layout */
+[data-cc="banner"] [data-cc="header"],
+[data-cc="banner"] [data-cc="description"],
+[data-cc="banner"] [data-cc="policy-link"],
+[data-cc="banner"] [data-cc="actions-primary"] {
+    margin-top: 0.5rem;
+}
+
+/* Titel & Text – erben Font-Familie / -Farbe aus den Utilities */
+[data-cc="banner"] [data-cc="title"] {
+    margin: 0;
+    font-weight: 600;
+    font-size: 1.125rem; /* text-lg */
+    line-height: 1.5rem;
+}
+
+[data-cc="banner"] [data-cc="description"] {
+    margin: 0.25rem 0 0 0;
+    font-size: 0.9375rem; /* knapp zwischen sm und base */
+    line-height: 1.35;
+    opacity: 0.9; /* leichte Abschwächung statt feste Farbe */
+}
+
+/* Link zur Datenschutzerklärung: Unterstreichung + primärer Farbzug (über .text-primary am Root) */
+[data-cc="banner"] [data-cc="policy-link"] a,
+[data-cc="banner"] [data-cc="router-link"] {
+    text-decoration: underline;
+    color: inherit; /* nimm .text-primary/.text-secondary vom Root */
+}
+
+/* Buttons: Basis */
+[data-cc="banner"] [data-cc="actions-primary"] {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+[data-cc="banner"] [data-cc^="btn-"] {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.9375rem;
+    line-height: 1.25rem;
+    font-weight: 500;
+}
+
+/* Sekundär-Buttons (Einstellungen / Alle ablehnen) – Outline, Farben von Root */
+[data-cc="banner"] [data-cc="btn-settings"],
+[data-cc="banner"] [data-cc="btn-reject"],
+[data-cc="banner"] [data-cc="btn-accept"] {
+    background: var(--color-primary);
+}
+
+/* Primär-Button (Alle akzeptieren) – nutzt .bg-primary & .text-primary via Utility-Klassen
+   → einfach Klasse auf den Button setzen, z. B. class="bg-primary text-primary" */
+[data-cc="banner"] [data-cc="btn-accept"] {
+    border: 1px solid transparent; /* wird von .border-primary überschrieben, falls gesetzt */
+}
+
+[data-cc="banner"] [data-cc="btn-accept"]:hover {
+    filter: brightness(0.98);
+}
+
+/* Settings-Bereich (aufklappbar) */
+[data-cc="banner"] [data-cc="settings"] {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid currentColor;
+    opacity: 0.98;
+}
+[data-cc="banner"] [data-cc="settings-title"] {
+    margin: 0 0 0.75rem 0;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Kategorienliste */
+[data-cc="banner"] [data-cc="category-list"] {
+    display: grid;
+    gap: 0.75rem;
+}
+[data-cc="banner"] [data-cc="category"] {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+[data-cc="banner"] [data-cc="category-label"] {
+    font-weight: 600;
+}
+[data-cc="banner"] [data-cc="category-description"] {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    opacity: 0.9;
+}
+
+/* Checkbox rechts */
+[data-cc="banner"] [data-cc="category-control"] {
+    margin-left: 1rem;
+}
+[data-cc="banner"] input[type="checkbox"][data-cc-category] {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 0.25rem;
+    /* Die Checkboxfarbe kommt von Browser/OS; wer mag, kann 'accent-color' via Utility setzen */
+}
+
+/* Settings-Aktionen (Speichern/Abbrechen/Alle an/aus) */
+[data-cc="banner"] [data-cc="actions-secondary"] {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+[data-cc="banner"] [data-cc="btn-save"],
+[data-cc="banner"] [data-cc="btn-cancel"],
+[data-cc="banner"] [data-cc="btn-enable-all"],
+[data-cc="banner"] [data-cc="btn-disable-all"] {
+    background: transparent;
+    color: inherit;
+    border: 1px solid currentColor;
+    border-radius: 8px;
+    padding: 0.5rem 0.875rem;
+    font-size: 0.9375rem;
+    font-weight: 500;
+}
+
+/* Hover-Fokus für Outline-Varianten */
+[data-cc="banner"] [data-cc="btn-save"]:hover,
+[data-cc="banner"] [data-cc="btn-cancel"]:hover,
+[data-cc="banner"] [data-cc="btn-enable-all"]:hover,
+[data-cc="banner"] [data-cc="btn-disable-all"]:hover {
+    opacity: 1;
+}
+
+/* ------------------------------------------------------------------
+   Responsive: Ab md/lg neben­einander (Text links, Buttons rechts)
+   ------------------------------------------------------------------ */
+@media (min-width: 1024px) {
+    [data-cc="banner"] .cc-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+    }
+    [data-cc="banner"] .cc-col-left {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    [data-cc="banner"] .cc-col-right {
+        flex: 0 0 auto;
+    }
+}
+
+/* ------------------------------------------------------------------
+   Fonts vom Consumer
+   - Gib am Root .font-primary (Gesamt) und optional .font-secondary
+     für Titel via Wrapper-Klasse (oder direkt am [data-cc="title"])
+   ------------------------------------------------------------------ */
+[data-cc="banner"].font-primary,
+[data-cc="banner"] .font-primary {
+    font-family: inherit; /* deine Utility setzt Familienname -> wird geerbt */
+}
+[data-cc="banner"] [data-cc="title"].font-secondary {
+    font-family: inherit;
+}

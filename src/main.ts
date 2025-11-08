@@ -2,7 +2,15 @@ import { createApp } from "vue";
 import { setupAnalytics } from "./lib/analytics";
 import { createHead } from "@vueuse/head";
 
+import CookieConsentPlugin, {
+    useCookieConsent,
+} from "@stratton-cologne/cookie-consent";
+
+import { initTheme } from "@/lib/theme";
+
 import "@/assets/style.css";
+import "@/assets/theme.css";
+import "@/assets/cookie-consent.css";
 
 import App from "./App.vue";
 import { i18n } from "./i18n";
@@ -13,8 +21,11 @@ const app = createApp(App);
 app.use(i18n);
 app.use(router);
 app.use(createHead());
-
+app.use(CookieConsentPlugin);
 setupAnalytics();
+
+// Client-Theme (Farben/Fonts) anwenden – nicht blocking
+initTheme();
 
 app.mount("#app");
 

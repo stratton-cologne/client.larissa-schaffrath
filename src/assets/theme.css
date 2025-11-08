@@ -1,0 +1,41 @@
+/* src/assets/css/theme.css */
+
+/* Defaults (falls API noch nicht geladen ist) */
+:root {
+    --color-primary: #ff9900;
+    --color-secondary: #e0e0e0;
+    --font-primary:
+        "Indie Flower", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+    --font-secondary:
+        "Poppins", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+}
+
+/* Tailwind v4: eigene Utilities per @layer */
+@layer utilities {
+    .text-primary {
+        color: var(--color-primary);
+    }
+    .bg-primary {
+        background-color: var(--color-primary);
+    }
+    .border-primary {
+        border-color: var(--color-primary);
+    }
+
+    .text-secondary {
+        color: var(--color-secondary);
+    }
+    .bg-secondary {
+        background-color: var(--color-secondary);
+    }
+    .border-secondary {
+        border-color: var(--color-secondary);
+    }
+
+    .font-primary {
+        font-family: var(--font-primary);
+    }
+    .font-secondary {
+        font-family: var(--font-secondary);
+    }
+}

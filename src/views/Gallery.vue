@@ -7,7 +7,7 @@
             <!-- Header -->
             <div class="camera-info mb-10 text-white flex w-full flex-col items-center justify-center">
                 <h3
-                    class="gallery-name text-primary font-poppins text-5xl font-light tracking-[0.25rem] lowercase mb-2.5">
+                    class="gallery-name text-primary font-secondary text-5xl font-light tracking-[0.25rem] lowercase mb-2.5">
                     {{ gallery.title }}
                 </h3>
                 <p v-if="gallery.description" class="gallery-des my-5 opacity-80">
