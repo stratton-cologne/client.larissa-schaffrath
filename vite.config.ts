@@ -36,13 +36,13 @@ export default defineConfig(({ mode }) => {
             proxy: {
                 // alles unter /api an Laravel/Backend
                 "/api": {
-                    target: "http://localhost:8000",
+                    target: "http://api.schaffrath.stratton.cologne",
                     changeOrigin: true,
                     // optional: wenn Backend kein /api-Prefix hat, hier umschreiben
                     // rewrite: (p) => p.replace(/^\/api/, ""),
                 },
                 // Medien-Download falls nicht unter /api liegt, ggf. ergänzen:
-                // "/storage": { target: "http://localhost:8000", changeOrigin: true },
+                // "/storage": { target: "http://api.schaffrath.stratton.cologne", changeOrigin: true },
             },
         },
     };

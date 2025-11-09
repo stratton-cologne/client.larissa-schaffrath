@@ -1,5 +1,5 @@
 // src/lib/api.ts
-// Minimaler API-Client für öffentliche Endpunkte (Proxy-freundlich)
+// Minimaler API-Client für öffentliche Endpunkte (Proxy- & ENV-freundlich)
 
 import type {
     ClientSettingsDto,
@@ -10,30 +10,88 @@ import type {
     LegalPageDto,
 } from "@/types";
 
-const RAW_BASE = (import.meta as any).env?.VITE_API_BASE_URL ?? "";
+/**
+ * ENV-Strategie:
+ * - DEV (direkter Backend-Call): VITE_API_BASE_URL="http://localhost:8000"
+ * - PROD:                         VITE_API_BASE_URL="http://api.schaffrath.stratton.cologne"
+ * - DEV (über Vite-Proxy):       VITE_API_BASE_URL=""  (leer lassen) → gleiche Origin, Proxy mappt /api
+ *
+ * Fallback ist window.location.origin (nützlich beim Proxy).
+ */
+const RAW_BASE =
+    (import.meta as any).env?.VITE_API_BASE_URL ??
+    (typeof window !== "undefined" ? window.location.origin : "");
+
+// Einmalige Definition des API-Prefixes
+const API_PREFIX = "/api";
+
+/** Trailing/leading Slashes bereinigen */
+function trimEndSlash(s: string) {
+    return s.replace(/\/+$/, "");
+}
+function trimStartSlash(s: string) {
+    return s.replace(/^\/+/, "");
+}
 
 /**
- * Erlaubt sowohl absolute (http://...) als auch relative (/api) Basen.
- * Bei relativem BASE greift in Dev der Vite-Proxy, in Prod dein Reverse-Proxy/Webserver.
+ * Baut eine gültige API-URL, garantiert **genau ein** '/api' in der Mitte.
+ * `endpoint` wird ohne führenden Slash erwartet (z. B. "client-settings", "galleries?published=1").
  */
-const API_BASE = RAW_BASE.endsWith("/") ? RAW_BASE.slice(0, -1) : RAW_BASE;
+function buildApiUrl(endpoint: string): string {
+    const base = trimEndSlash(RAW_BASE || "");
+    const cleanEndpoint = trimStartSlash(endpoint);
+
+    // Prüfen, ob base bereits mit /api endet
+    const baseHasApi = /\/api$/i.test(base);
+
+    // Wenn base leer ist (Proxy), Prefix bleibt als relativer Pfad "/api"
+    if (!base) return `${API_PREFIX}/${cleanEndpoint}`;
+
+    // Wenn base bereits /api hat → kein weiteres /api
+    if (baseHasApi) return `${base}/${cleanEndpoint}`;
+
+    // Sonst genau ein /api einfügen
+    return `${base}${API_PREFIX}/${cleanEndpoint}`;
+}
 
 type Json = Record<string, unknown> | unknown[];
 
-async function get<T = unknown>(path: string, init?: RequestInit): Promise<T> {
-    const url = path.startsWith("/")
-        ? `${API_BASE}${path}`
-        : `${API_BASE}/${path}`;
+async function get<T = unknown>(
+    endpoint: string,
+    init?: RequestInit,
+): Promise<T> {
+    const url = buildApiUrl(endpoint);
     const res = await fetch(url, {
         method: "GET",
         headers: { Accept: "application/json" },
-        // credentials nur setzen, wenn du Cookies/Sanctum brauchst:
-        // credentials: "include",
+        // credentials: "include", // nur falls Cookies/Sanctum benötigt
         ...init,
     });
     if (!res.ok) {
         const text = await res.text().catch(() => "");
-        throw new Error(`GET ${path} failed: ${res.status} ${text}`);
+        throw new Error(`GET ${url} failed: ${res.status} ${text}`);
+    }
+    return (await res.json()) as T;
+}
+
+async function post<T = unknown>(
+    endpoint: string,
+    body?: Json,
+    init?: RequestInit,
+): Promise<T> {
+    const url = buildApiUrl(endpoint);
+    const res = await fetch(url, {
+        method: "POST",
+        headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+        },
+        body: body ? JSON.stringify(body) : undefined,
+        ...init,
+    });
+    if (!res.ok) {
+        const text = await res.text().catch(() => "");
+        throw new Error(`POST ${url} failed: ${res.status} ${text}`);
     }
     return (await res.json()) as T;
 }
@@ -42,10 +100,10 @@ async function get<T = unknown>(path: string, init?: RequestInit): Promise<T> {
  * Medien-Helpers
  * ------------------------------------------*/
 export function mediaDownloadUrl(mediaId: number, version?: number): string {
-    // Achtung: /api/media/:id/download ist im Backend evtl. protected (Auth).
+    // Achtung: /api/media/:id/download kann im Backend geschützt sein (Auth).
     const v = typeof version === "number" ? `?version=${version}` : "";
-    // Wichtig: relative URL, damit Proxy greift
-    return `${API_BASE}/api/media/${mediaId}/download${v}`;
+    // Wichtig: über denselben URL-Builder (verhindert doppelte /api)
+    return buildApiUrl(`media/${mediaId}/download${v}`);
 }
 
 /** -------- Hintergrund-Normalisierung -------- */
@@ -77,7 +135,7 @@ export function backgroundMediaSrc(
     bg: ClientSettingsDto["background"] | null | undefined,
 ): string | null {
     if (!bg) return null;
-    if (bg.url) return bg.url;
+    if (bg.url) return bg.url; // absolute/relative URL aus dem Backend übernehmen
     if (bg.media_id) return mediaDownloadUrl(bg.media_id);
     return null;
 }
@@ -137,52 +195,40 @@ export function normalizePortfolio(p: PortfolioDto): PortfolioDtoNormalized {
  * Öffentliche API-Methoden
  * ------------------------------------------*/
 export const api = {
-    getClientSettings: () => get<ClientSettingsDto>("/api/client-settings"),
+    // ⚠︎ Endpunkte OHNE führendes "/api" übergeben!
+    getClientSettings: () => get<ClientSettingsDto>("client-settings"),
 
     // Portfolio: GET /api/portfolio -> normalisiert (avatarUrl befüllt)
     getPortfolio: async () => {
-        const p = await get<PortfolioDto>("/api/portfolio");
+        const p = await get<PortfolioDto>("portfolio");
         return normalizePortfolio(p) as PortfolioDtoNormalized;
     },
 
     // Kontakt: GET /api/contact
-    getContact: () => get<ContactDto>("/api/contact"),
+    getContact: () => get<ContactDto>("contact"),
 
-    // alle (Option B vom Controller wäre z.B. ?perPage=all)
+    // Alle Galerien (optional gefiltert)
     getGalleries: async (params?: { published?: 0 | 1 }) => {
-        const url = new URL("/api/galleries", window.location.origin);
-        if (params?.published !== undefined)
-            url.searchParams.set("published", String(params.published));
-        const res = await fetch(url.toString(), {
-            headers: { Accept: "application/json" },
-        });
-        if (!res.ok) throw new Error("Failed to load galleries");
-        return (await res.json()) as GalleryItem[]; // bei Paginator ggf. .data nehmen
+        const qs =
+            params?.published !== undefined
+                ? `?published=${params.published}`
+                : "";
+        return await get<GalleryItem[]>(`galleries${qs}`);
     },
 
     fetchGalleries: async (params?: { published?: 0 | 1 }) => {
-        const url = new URL("/api/galleries", window.location.origin);
-        if (params?.published !== undefined)
-            url.searchParams.set("published", String(params.published));
-        const res = await fetch(url, {
-            headers: { Accept: "application/json" },
-        });
-        if (!res.ok) throw new Error("Failed to load galleries");
-        return (await res.json()) as GalleryItem[];
+        const qs =
+            params?.published !== undefined
+                ? `?published=${params.published}`
+                : "";
+        return await get<GalleryItem[]>(`galleries${qs}`);
     },
 
     fetchGalleryById: async (id: number) => {
-        const res = await fetch(
-            new URL(`/api/galleries/${id}`, window.location.origin),
-            {
-                headers: { Accept: "application/json" },
-            },
-        );
-        if (!res.ok) throw new Error("Failed to load gallery");
-        return (await res.json()) as GalleryShowResponse;
+        return await get<GalleryShowResponse>(`galleries/${id}`);
     },
 
-    // Legal Pages: GET /api/legal/:slug  (slug: "impressum" | "datenschutz")
+    // Legal Pages: GET /api/legal/:slug
     getLegal: (slug: "impressum" | "datenschutz") =>
-        get<LegalPageDto>(`/api/legal/${slug}`),
+        get<LegalPageDto>(`legal/${slug}`),
 };
