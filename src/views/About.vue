@@ -1,13 +1,25 @@
+<!-- src/views/About.vue -->
 <template>
-    <OverlayShell :open="isVisible" @close="$emit('close')">
-        <CloseXButton :ariaLabel="t('common.close')" @click="$emit('close')" />
+    <!-- Overlay + Close identisch wie in Contact -->
+    <OverlayShell :open="isVisible" @close="$emit('close')" aria-label="Über mich">
+        <!-- fester Close oben rechts, hohe Ebene -->
+        <CloseXButton :ariaLabel="t('common.close')" :ariaControls="'about-modal'" @click="$emit('close')" />
 
+        <!-- Karten-Layout identisch zu Contact -->
         <ModalCard>
+            <template #header>
+                <!-- Accessible Headline (visually hidden, für aria-controls) -->
+                <h2 id="about-modal" class="sr-only">Über</h2>
+            </template>
+
+            <!-- Inhalt: ProfileCard liefert Avatar, Name, Subtitle, Description, Footer -->
             <ProfileCard :img="profileImg" :name="profileName" :subtitle="profileSubtitle">
+                <!-- Beschreibung (unverändert) -->
                 <template #description>
                     {{ portfolio?.about || t('about.description') }}
                 </template>
 
+                <!-- Footer/Links (unverändert) -->
                 <template #footer>
                     <SocialLinksInline :items="socialItems" />
                 </template>
@@ -17,62 +29,57 @@
 </template>
 
 <script setup lang="ts">
+/**
+ * About-View:
+ * - identisches Overlay- und Karten-Gerüst wie Contact
+ * - CloseXButton z-index/pointer-events fix
+ * - ProfileCard rendert Avatar NICHT beschnitten (object-contain)
+ * - Inhalte (Description/Footer) bleiben über Slots erhalten
+ */
 import { computed } from 'vue'
 import { useI18n } from 'vue-i18n'
-
-// Shell & UI
 import OverlayShell from '@/components/ui/OverlayShell.vue'
 import CloseXButton from '@/components/ui/CloseXButton.vue'
 import ModalCard from '@/components/ui/ModalCard.vue'
 import SocialLinksInline from '@/components/ui/SocialLinksInline.vue'
-
-// About-specific
 import ProfileCard from '@/components/about/ProfileCard.vue'
-
-// Fallback-Bild
 import fallbackImg from '@/assets/image/portfolio-image.png'
-
-// Typen + Helper
 import type { PortfolioDto } from '@/types'
 import { mediaDownloadUrl } from '@/lib/api'
 
 const { t } = useI18n()
 
-/** HINWEIS:
- * api.getPortfolio() liefert bei dir jetzt ein erweitertes Objekt mit { avatarUrl }.
- * Damit TS happy ist, erlauben wir avatarUrl optional in der Prop.
- */
-const props = defineProps<{ isVisible: boolean; portfolio: PortfolioDto & { avatarUrl?: string | null } }>()
+const props = defineProps<{
+    isVisible: boolean
+    portfolio: PortfolioDto & { avatarUrl?: string | null }
+}>()
+
 defineEmits(['close'])
 
-/** Bestmögliche Bildquelle:
- * 1) Normalisierte avatarUrl vom API-Client
- * 2) Fallback: aus avatar.id (+ optionaler Version) zusammensetzen
- * 3) Fallback: lokales Bild
- */
-const profileImg = computed(() => {
+/** Avatar-URL robust ermitteln (Normalized URL → Media → Fallback) */
+const profileImg = computed<string>(() => {
     const fromNormalized = props.portfolio?.avatarUrl
     if (fromNormalized) return fromNormalized
-
     const mediaId = props.portfolio?.avatar?.id
     const version = props.portfolio?.avatar?.currentVersion?.version
     if (typeof mediaId === 'number') {
         return mediaDownloadUrl(mediaId, typeof version === 'number' ? version : undefined)
     }
-
     return fallbackImg
 })
 
-// Name + Subtitle mit harten string-Fallbacks, damit die Props strikt `string` bleiben
-const profileName = computed(() => props.portfolio?.name ?? '—')
-const profileSubtitle = computed(() => props.portfolio?.tagline ?? (t('about.subtitle') || 'portraits'))
+/** Name & Untertitel (robust mit Fallback) */
+const profileName = computed<string>(() => props.portfolio?.name ?? '—')
+const profileSubtitle = computed<string>(() =>
+    props.portfolio?.tagline ?? (t('about.subtitle') || 'portraits')
+)
 
-// Socials
+/** Social-Links (unverändert, nur robust zusammengesetzt) */
 const socialKeys = ['instagram', 'flickr', 'facebook', 'twitter'] as const
 const socialItems = computed(() =>
     socialKeys.map((k) => ({
-        label: t(`about.social.${k}`),
-        href: props.portfolio?.socials?.[k] || '#',
-    })),
+        label: t(`about.social.${k}`),              // Achtung: wenn Keys fehlen, werden sie so angezeigt
+        href: props.portfolio?.socials?.[k] || '#', // besser: optional ausblenden, wenn kein Link vorhanden
+    }))
 )
 </script>

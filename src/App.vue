@@ -36,7 +36,7 @@
         <RouterView />
 
         <!-- ... in App.vue, direkt innerhalb der <div class="app-root ...">, NACH den Sheets -->
-        <footer class="pointer-events-auto fixed bottom-4 left-4 z-60 flex gap-4 text-sm text-white/70"
+        <footer class="pointer-events-auto fixed bottom-4 left-4 z-10 flex gap-4 text-sm text-white/70"
             aria-label="Rechtliches">
             <RouterLink to="/impressum" class="underline hover:text-white transition-colors">Impressum</RouterLink>
             <span aria-hidden="true">·</span>
